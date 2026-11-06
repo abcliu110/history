@@ -1,4 +1,4 @@
-/* 时间里的中国：护眼配色，与识字星球字卡页同款底色 */
+/* 时间里的中国 v2：地图为核心，时间线在旁边。护眼配色与识字星球字卡页同款。 */
 :root {
   --bg: #e4eedf;
   --card: #f2f6ee;
@@ -11,34 +11,58 @@
   --line: #d5dfd0;
   --gold: #a8642f;
   --red: #8f1d3f;
+  --river: #5b8fb0;
+  --land: #dcead9;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.8; }
 .topbar { background: var(--card); border-bottom: 2px solid var(--line); position: sticky; top: 0; z-index: 10; }
-.topbar-inner { max-width: 860px; margin: 0 auto; padding: 16px 20px; }
+.topbar-inner { max-width: 1080px; margin: 0 auto; padding: 14px 20px; }
 .topbar h1 { margin: 0; font-size: 26px; color: var(--accent-deep); }
 .subtitle { margin: 4px 0 0; color: var(--ink-soft); font-size: 15px; }
-.wrap { max-width: 860px; margin: 0 auto; padding: 20px; }
-.foot { max-width: 860px; margin: 0 auto; padding: 0 20px 32px; color: var(--ink-soft); font-size: 14px; }
-.lead { background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 20px; font-size: 17px; }
-.lead b { color: var(--accent-deep); }
-/* 时间线 */
-.timeline { list-style: none; margin: 0; padding: 0 0 0 18px; border-left: 4px solid var(--accent-soft); }
-.timeline li { position: relative; margin: 0 0 16px; }
-.timeline li::before { content: ""; position: absolute; left: -29px; top: 22px; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); }
-.era-card { display: block; background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 16px 18px; text-decoration: none; color: var(--ink); }
-.era-card:hover { border-color: var(--accent); }
-.era-card .years { color: var(--gold); font-weight: 700; font-size: 15px; }
-.era-card h2 { margin: 2px 0 4px; font-size: 22px; color: var(--accent-deep); }
-.era-card p { margin: 0; color: var(--ink-soft); }
-.era-card .lenses { margin-top: 8px; font-size: 14px; color: var(--accent-deep); }
-/* 详情页 */
-.backrow { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
-.backbtn { display: inline-block; padding: 10px 18px; border-radius: 12px; background: var(--accent); color: #fff; font-size: 17px; font-weight: 700; text-decoration: none; border: 2px solid var(--accent-deep); cursor: pointer; }
-.backbtn.ghost { background: var(--accent-soft); color: var(--accent-deep); }
-.detail h2 { margin: 0 0 4px; font-size: 26px; color: var(--accent-deep); }
-.detail .years { color: var(--gold); font-weight: 700; font-size: 17px; }
-.detail .tagline { font-size: 18px; background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 12px 16px; margin: 12px 0 20px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 20px; }
+.foot { max-width: 1080px; margin: 0 auto; padding: 0 20px 32px; color: var(--ink-soft); font-size: 14px; }
+.layout { display: grid; grid-template-columns: 210px 1fr; gap: 16px; align-items: start; }
+/* 侧边时间线 */
+.rail { position: sticky; top: 96px; background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 14px; }
+.rail-title { font-size: 17px; font-weight: 700; color: var(--accent-deep); margin-bottom: 10px; }
+.rail ol { list-style: none; margin: 0; padding: 0 0 0 12px; border-left: 4px solid var(--accent-soft); }
+.rail li { position: relative; margin-bottom: 10px; }
+.rail li::before { content: ""; position: absolute; left: -19px; top: 14px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+.rail button { display: block; width: 100%; text-align: left; background: transparent; border: 2px solid transparent; border-radius: 10px; padding: 8px 10px; cursor: pointer; color: var(--ink); font-size: 15px; line-height: 1.5; }
+.rail button:hover { border-color: var(--accent); }
+.rail button.active { background: var(--accent-soft); border-color: var(--accent-deep); }
+.rail button .y { display: block; color: var(--gold); font-size: 12px; font-weight: 700; }
+.rail button .n { font-weight: 700; color: var(--accent-deep); }
+/* 地图 */
+.mapcard { background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 10px; }
+.mapcard svg { width: 100%; height: auto; display: block; }
+.map-land { fill: var(--land); stroke: var(--accent-deep); stroke-width: 2; }
+.map-territory { fill: rgba(74, 122, 89, 0.35); stroke: var(--accent); stroke-width: 2.5; }
+.map-river { fill: none; stroke: var(--river); stroke-width: 3; stroke-linecap: round; }
+.map-route { fill: none; stroke: var(--gold); stroke-width: 3; stroke-dasharray: 8 5; stroke-linecap: round; }
+.route-label { font-size: 14px; font-weight: 700; fill: var(--gold); }
+.city-dot { fill: var(--ink-soft); }
+.city-label { font-size: 13px; fill: var(--ink-soft); }
+.mk { cursor: pointer; }
+.mk circle { stroke: var(--surface); stroke-width: 2; }
+.mk.capital circle { fill: var(--red); }
+.mk.point circle { fill: var(--gold); }
+.mk.astro circle { fill: var(--accent-deep); }
+.mk-sym { font-size: 11px; font-weight: 700; fill: #fff; text-anchor: middle; pointer-events: none; }
+.mk-label { font-size: 14px; font-weight: 700; fill: var(--ink); }
+.mapnote { margin-top: 8px; font-size: 16px; color: var(--accent-deep); font-weight: 700; }
+.markerpop { margin-top: 6px; background: var(--card); border: 2px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 16px; min-height: 52px; }
+.markerpop b { color: var(--accent-deep); }
+/* 地图下按钮 */
+.mapbar { display: flex; gap: 10px; margin: 14px 0; flex-wrap: wrap; }
+.mapbtn { padding: 10px 18px; border-radius: 12px; background: var(--card); color: var(--accent-deep); font-size: 16px; font-weight: 700; border: 2px solid var(--accent); cursor: pointer; }
+.mapbtn.primary { background: var(--accent); color: #fff; border-color: var(--accent-deep); }
+.mapbtn:disabled { opacity: 0.45; cursor: default; }
+/* 故事 */
+.story h2 { margin: 0 0 4px; font-size: 26px; color: var(--accent-deep); }
+.story .years { color: var(--gold); font-weight: 700; font-size: 17px; }
+.story .tagline { font-size: 18px; background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 12px 16px; margin: 12px 0 16px; }
 .lens { background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; }
 .lens h3 { margin: 0 0 8px; font-size: 19px; color: var(--accent-deep); }
 .lens ul { margin: 0; padding-left: 22px; }
@@ -61,8 +85,17 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: "PingFa
 .quiz .why { background: var(--surface); border-radius: 10px; padding: 10px 14px; margin: 8px 0; }
 .quiz .nextbtn { padding: 10px 18px; border-radius: 12px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; border: 2px solid var(--accent-deep); cursor: pointer; }
 .quiz .score { font-size: 18px; font-weight: 700; color: var(--accent-deep); }
+@media (max-width: 720px) {
+  .layout { grid-template-columns: 1fr; }
+  .rail { position: static; padding: 10px 12px; }
+  .rail ol { display: flex; gap: 8px; overflow-x: auto; border-left: none; padding: 0; }
+  .rail li { margin-bottom: 0; flex: 0 0 auto; }
+  .rail li::before { display: none; }
+  .rail button { white-space: nowrap; }
+  .city-label { display: none; }
+}
 @media (prefers-color-scheme: dark) {
-  :root { --bg: #232a22; --card: #2e362c; --surface: #333d31; --ink: #e6ebe2; --ink-soft: #b9c4b4; --accent: #7fb08d; --accent-deep: #a8cfae; --accent-soft: #3d5240; --line: #4a5546; --gold: #d9a05b; }
-  .backbtn { color: #1e261d; }
+  :root { --bg: #232a22; --card: #2e362c; --surface: #333d31; --ink: #e6ebe2; --ink-soft: #b9c4b4; --accent: #7fb08d; --accent-deep: #a8cfae; --accent-soft: #3d5240; --line: #4a5546; --gold: #d9a05b; --land: #33402f; }
+  .mapbtn.primary { color: #1e261d; }
   .quiz .opt.wrong { background: #4a2a33; }
 }

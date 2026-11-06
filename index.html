@@ -10,14 +10,37 @@
 <header class="topbar">
   <div class="topbar-inner">
     <h1>时间里的中国</h1>
-    <p class="subtitle">沿着时间线，天文、历史、地理、文学、文化放在一起讲</p>
+    <p class="subtitle">一副不断变化的中国地图，时间线在旁边——点一个朝代，地图就变到那个年代</p>
   </div>
 </header>
-<main id="app" class="wrap"></main>
+<main class="wrap">
+  <div class="layout">
+    <aside class="rail" id="rail">
+      <div class="rail-title">时间线</div>
+      <ol id="railList"></ol>
+    </aside>
+    <section class="stage">
+      <div class="mapcard">
+        <svg id="mapSvg" viewBox="0 0 1000 720" role="img" aria-label="中国示意地图"></svg>
+        <div class="mapnote" id="mapNote"></div>
+        <div class="markerpop" id="markerPop">点一点地图上的标记，看看那个地方的故事。</div>
+      </div>
+      <div class="mapbar">
+        <button class="mapbtn" id="btnPrev" type="button">← 上一时期</button>
+        <button class="mapbtn primary" id="btnPlay" type="button">▶ 播放时间</button>
+        <button class="mapbtn" id="btnNext" type="button">下一时期 →</button>
+      </div>
+      <div class="story" id="story"></div>
+      <section class="quiz" id="quizBox"></section>
+    </section>
+  </div>
+</main>
 <footer class="foot">
-  <p>一句话说明：不是分科，是一个时期讲到底——站在那个年代，看星星、走山河、读诗文、过生活。</p>
+  <p>地图为示意图（手绘轮廓），用于帮孩子建立方位感，不作精确测绘；疆域范围为示意。古诗文引文为公有领域原文；年代与史实按通用说法写。</p>
 </footer>
 <script src="data.js"></script>
+<script src="mapdata.js"></script>
+<script src="map.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
