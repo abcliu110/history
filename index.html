@@ -1,46 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
 <title>时间里的中国</title>
-<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<header class="topbar">
-  <div class="topbar-inner">
-    <h1>时间里的中国</h1>
-    <p class="subtitle">点一个事件，地图就亮出它发生的地方，讲完自动到下一个事件</p>
-  </div>
-</header>
 <main class="wrap">
-  <div class="layout">
-    <aside class="rail" id="rail">
-      <div class="rail-title">时间线</div>
-      <ol id="railList"></ol>
-      <div class="rail-note">小提示：东周就是春秋和战国两段，所以东周不单独列；三国和西晋、元朝和南宋、近现代和清朝末年都有几年重叠——朝代是按大事分的，不是按年份切开的。</div>
-    </aside>
-    <section class="stage">
-      <div class="ev-strip" id="evStrip" hidden></div>
-      <div class="mapcard">
-        <svg id="mapSvg" viewBox="0 0 1000 720" role="img" aria-label="中国示意地图"></svg>
-        <div class="mapchanged" id="mapChanged" hidden></div>
-        <div class="mapnote" id="mapNote"></div>
-        <div class="markerpop" id="markerPop">点一点地图上的标记，看看那个地方的故事。</div>
-      </div>
-      <div class="mapbar">
-        <button class="mapbtn" id="btnPrev" type="button">← 上一个</button>
-        <button class="mapbtn primary" id="btnPlay" type="button">▶ 播放时间</button>
-        <button class="mapbtn" id="btnNext" type="button">下一个 →</button>
-      </div>
-      <div class="story" id="story"></div>
-      <section class="quiz" id="quizBox"></section>
-    </section>
+  <div class="lead">
+    <span class="kicker">一张会变的地图，讲完几千年中国</span>
+    地图是主角：<b>点一个事件，地图就亮出它发生的地方</b>——有好几个地方的，红线会按顺序把它们连起来。在地图下方的<b>时间线</b>选一个朝代，在<b>大事索引</b>里挑一个事件，上面的<b>地图</b>就会变——都城搬家、河流改道、新的路被画出来。想连着看，点<b>播放时间</b>，它会一站一站往下讲，随时能暂停。点地图上的<b>地点</b>，就讲那个地方在那个年代的故事；地图下方的故事卡（天文、历史、地理、文学、文化）讲的全是地图上正在发生的事。
+    <div class="note">这是手绘示意地图：只标每个时期重要的地方，位置和路线都是大致示意，帮你建立方位感，不作精确测绘。地图后面淡淡印着现在的中国轮廓，可以对照每个发生地在今天的什么位置。</div>
   </div>
+  <div class="layout">
+    <aside class="timeline-box" aria-label="时间线">
+      <h2>时间线 · 朝代</h2>
+      <ol class="tl-list" id="tlList"></ol>
+      <p class="tl-note">小提示：东周就是春秋和战国两段，所以东周不单独列；三国和西晋、元朝和南宋、近现代和清朝末年都有几年重叠——朝代是按大事分的，不是按年份切开的。</p>
+      <div class="evx">
+        <h2 class="evx-title">大事索引<span class="evx-count" id="evxCount"></span></h2>
+        <div class="tourbar">
+          <button class="tour-toggle navbtn play" type="button" id="tourToggle">▶ 连播</button>
+          <span class="tour-pos"></span>
+          <div class="tour-track" aria-hidden="true"><div class="tour-fill"></div></div>
+          <p class="tour-hint">点连播，一站停 6 秒，进度条走完就到下一站；点任意事件、地点或题目，连播会停下来。</p>
+        </div>
+        <input class="evx-search" id="evxSearch" type="search" placeholder="搜事件或地点，如：运河、长安" aria-label="搜索事件" />
+        <button class="evx-filter" type="button" id="evxRouteBtn" aria-pressed="false">只看有路线的事件</button>
+        <p class="evx-legend" aria-label="事件类型图例"><span class="lg"><span class="tdot t-uni"></span>统一</span><span class="lg"><span class="tdot t-war"></span>打仗</span><span class="lg"><span class="tdot t-envoy"></span>出使</span><span class="lg"><span class="tdot t-build"></span>建设</span><span class="lg"><span class="tdot t-culture"></span>文化</span></p>
+        <div id="evxGroups"></div>
+      </div>
+    </aside>
+    <section class="stage" id="stage" aria-label="地图"></section>
+    <aside class="panel" id="panel" aria-label="这个时期的故事"></aside>
+  </div>
+  <section class="quiz" id="quizBox" aria-label="动手练"></section>
 </main>
-<footer class="foot">
-  <p>地图为示意图（手绘轮廓），用于帮孩子建立方位感，不作精确测绘；疆域范围为示意。古诗文引文为公有领域原文；年代与史实按通用说法写。</p>
-</footer>
 <script src="data.js"></script>
 <script src="mapdata.js"></script>
 <script src="dynasties.js"></script>

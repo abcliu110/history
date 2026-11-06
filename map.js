@@ -1,86 +1,107 @@
-/* 中国示意地图：手绘轮廓 + 黄河、长江；只显示重要的地名（都城、事件点、观星点）。
- * 注意：这是示意图，用于帮孩子建立方位感，不作精确测绘；疆域范围亦为示意。 */
-window.CHINA_MAP = {
-  viewBox: '0 0 1000 720',
-  outline: 'M900,51 L848,214 L835,248 L810,282 L764,286 L739,317 L732,334 L706,368 L726,428 L719,487 L693,539 L655,573 L603,590 L564,607 L558,619 L526,606 L513,599 L474,590 L448,573 L423,539 L416,488 L345,479 L294,496 L255,453 L190,419 L139,385 L126,334 L152,299 L190,248 L242,214 L294,180 L319,154 L384,128 L448,111 L513,111 L577,111 L642,111 L706,94 L732,60 L797,51 Z',
-  hainan: { cx: 560, cy: 645, rx: 16, ry: 24 },
-  rivers: [
-    { id: 'yellow', name: '黄河', d: 'M435,368 C480,350 510,349 529,308 C545,275 570,262 577,265 C600,290 610,318 624,373 C650,372 670,350 693,325' },
-    { id: 'yangtze', name: '长江', d: 'M345,371 C420,420 480,450 532,460 C570,455 594,441 633,443 C670,435 691,417 726,428' }
-  ]
-};
+/* 时间里的中国 — 2026-11-06 由原型 artifact（shi-jian-li-de-zhong-guo）如实移植进仓库。 */
+'use strict';
 
-function escAttr(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-/* 在 svg 元素里画出某时期的地图状态。
- * mapState: { territory:[d...], territoryNote, capital:[{x,y,name}], routes:[{id,name,d,lx,ly}], points:[{x,y,label,text}], astro:[{x,y,label,text}],
- *   where:[{x,y,label,text}]（事件发生地，按顺序）, wherePath（发生地之间的连线） }
- * onMarker(kind, item): 点标记时的回调。
- * highlight（可选）: { territory:bool, routes:[id...], capitals:[name...], points:[label...], astro:[label...] }——
- * 这一站新出现的东西，画出来时带一次闪烁，让孩子一眼看到地图变了哪里。
- * 发生地标记（where）不参与 highlight：它自己按顺序一个一个蹦出来，连线慢慢画出来。 */
-window.renderChinaMap = function (svg, mapState, onMarker, highlight) {
-  var M = window.CHINA_MAP;
-  var hi = highlight || {};
-  function has(list, v) { return (list || []).indexOf(v) !== -1; }
-  var whereList = mapState.where || [];
-  /* 发生地附近 20px 内的普通标记不画了——编号标记已经代表那个地方，避免两个圈叠在一起。 */
-  function nearWhere(x, y) {
-    for (var i = 0; i < whereList.length; i++) {
-      var dx = whereList[i].x - x, dy = whereList[i].y - y;
-      if (dx * dx + dy * dy < 400) return true;
-    }
-    return false;
-  }
-  var h = '';
-  h += '<path class="map-land" d="' + M.outline + '"/>';
-  h += '<ellipse class="map-land" cx="' + M.hainan.cx + '" cy="' + M.hainan.cy + '" rx="' + M.hainan.rx + '" ry="' + M.hainan.ry + '"/>';
-  (mapState.territory || []).forEach(function (d) {
-    h += '<path class="map-territory' + (hi.territory ? ' flash' : '') + '" d="' + d + '"/>';
-  });
-  M.rivers.forEach(function (r) {
-    h += '<path class="map-river" d="' + r.d + '"/>';
-  });
-  (mapState.routes || []).forEach(function (rt) {
-    var f = has(hi.routes, rt.id) ? ' flash' : '';
-    h += '<path class="map-route' + f + '" d="' + rt.d + '"/>';
-    h += '<text class="route-label' + f + '" x="' + rt.lx + '" y="' + rt.ly + '">' + escAttr(rt.name) + '</text>';
-  });
-  /* 发生地之间的连线：慢慢画出来，标出地点之间的变化。 */
-  if (mapState.wherePath) {
-    h += '<path class="where-path" pathLength="100" d="' + mapState.wherePath + '"/>';
-  }
-  function marker(cls, it, sym) {
-    if (nearWhere(it.x, it.y)) return '';
-    var key = it.label || it.name;
-    var list = cls === 'capital' ? hi.capitals : cls === 'astro' ? hi.astro : hi.points;
-    var f = has(list, key) ? ' flash' : '';
-    return '<g class="mk ' + cls + f + '" data-kind="' + cls + '" data-label="' + escAttr(key) + '">' +
-      '<circle cx="' + it.x + '" cy="' + it.y + '" r="9"/>' +
-      '<text class="mk-sym" x="' + it.x + '" y="' + (it.y + 4.5) + '">' + sym + '</text>' +
-      '<text class="mk-label" x="' + (it.x + 12) + '" y="' + (it.y + 4) + '">' + escAttr(key) + '</text></g>';
-  }
-  (mapState.capital || []).forEach(function (c) { h += marker('capital', c, '都'); });
-  (mapState.points || []).forEach(function (p) { h += marker('point', p, '●'); });
-  (mapState.astro || []).forEach(function (a) { h += marker('astro', a, '★'); });
-  /* 发生地：编号圆点，按顺序一个一个蹦出来。 */
-  whereList.forEach(function (wpt, i) {
-    h += '<g class="mk where-mk" data-kind="where" data-label="' + escAttr(wpt.label) + '" style="animation-delay: ' + (0.5 + 0.5 * i).toFixed(1) + 's">' +
-      '<circle cx="' + wpt.x + '" cy="' + wpt.y + '" r="11"/>' +
-      '<text class="mk-sym" x="' + wpt.x + '" y="' + (wpt.y + 4.5) + '">' + (i + 1) + '</text>' +
-      '<text class="mk-label" x="' + (wpt.x + 14) + '" y="' + (wpt.y + 4) + '">' + escAttr(wpt.label) + '</text></g>';
-  });
-  svg.innerHTML = h;
-  svg.querySelectorAll('.mk').forEach(function (g) {
-    g.addEventListener('click', function () {
-      var kind = g.getAttribute('data-kind');
-      var label = g.getAttribute('data-label');
-      var list = kind === 'capital' ? mapState.capital : kind === 'astro' ? mapState.astro : kind === 'where' ? mapState.where : mapState.points;
-      var item = null;
-      (list || []).forEach(function (it) { if ((it.label || it.name) === label) item = it; });
-      if (item && onMarker) onMarker(kind, item);
+  /* ---------- 地图状态（统一成：疆域 / 路线 / 都城 / 标记 / 观星点） ---------- */
+  function normTerr(list) {
+    return (list || []).map(function (t) {
+      return typeof t === 'string' ? { d: t } : t;
     });
-  });
-};
+  }
+  function eventState(ev) {
+    var m = ev.map;
+    var marks = [];
+    if (m.cap) marks.push({ name: m.cap.name, sub: m.cap.sub, kind: '都城', story: m.cap.story, cap: true });
+    (m.marks || []).forEach(function (p) { marks.push(p); });
+    if (m.star) marks.push({ name: m.star.name, sub: '观测天象', kind: '观星', story: m.star.story, star: true });
+    var w = EVENT_WHERE[ev.id] || null;
+    return {
+      keyEvent: !!KEY_EVENTS[ev.id],
+      terr: normTerr(TERR[m.terr]),
+      routes: (m.routes || []).map(function (k) { var r = EV_ROUTES[k]; return { key: k, d: r.d, lx: r.lx, ly: r.ly, label: r.label }; }),
+      marks: marks,
+      where: w ? w.list : [],
+      wherePath: w ? w.path : null
+    };
+  }
+  function eraState(era) {
+    var md = MAPDATA[era.id];
+    var routes = [];
+    var rt = HAND_ROUTES[era.id];
+    if (rt) routes.push({ key: rt.key, d: rt.d, lx: rt.lx, ly: rt.ly, label: rt.label });
+    return { terr: normTerr(TERRITORY[era.id]), routes: routes, marks: md.places.slice() };
+  }
+  function stateKeys(state) {
+    var s = {};
+    state.terr.forEach(function (t) { s['t:' + t.d] = 1; });
+    state.routes.forEach(function (r) { s['r:' + r.key] = 1; });
+    state.marks.forEach(function (p) { s[(p.cap ? 'c:' : (p.star ? 's:' : 'm:')) + p.name] = 1; });
+    return s;
+  }
+
+  /* 地图与地点列表实际显示的标记：发生地排在最前（红色编号 1、2、3……），
+   * 发生地 20px 内的普通标记（都城、事件点、观星点）不再重复画——编号标记已经代表那个地方。 */
+  function displayMarks(state) {
+    var where = state.where || [];
+    function nearWhere(p) {
+      var xy = PLACE_XY[p.name];
+      if (!xy) return false;
+      for (var i = 0; i < where.length; i++) {
+        var wxy = PLACE_XY[where[i].name];
+        if (!wxy) continue;
+        var dx = wxy[0] - xy[0], dy = wxy[1] - xy[1];
+        if (dx * dx + dy * dy < 400) return true;
+      }
+      return false;
+    }
+    var out = [];
+    where.forEach(function (w) { out.push({ name: w.name, sub: '', kind: '发生地', story: w.text, where: true, core: w.core || '' }); });
+    state.marks.forEach(function (p) { if (!nearWhere(p)) out.push(p); });
+    return out;
+  }
+
+  function buildMapSvg(state, marks, newKeys) {
+    function fl(key) { return newKeys && newKeys[key] ? ' flash' : ''; }
+    var h = '<svg viewBox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
+    h += '<path class="map-land" d="' + MAP_OUTLINE + '"/>';
+    h += '<ellipse class="map-land" cx="595" cy="607" rx="21" ry="15"/>';
+    /* 水印：现在的中国轮廓，印在历史地图后面，换站一直在、点不到。 */
+    h += '<g class="wm-layer" aria-hidden="true"><path class="wm-outline" d="' + MODERN_OUTLINE + '"/>' +
+      '<path class="wm-outline" d="' + MODERN_TAIWAN + '"/><path class="wm-outline" d="' + MODERN_HAINAN + '"/>' +
+      '<text class="wm-label" x="822" y="618" text-anchor="middle">现在的中国</text></g>';
+    state.terr.forEach(function (t) {
+      h += '<path class="map-territory' + fl('t:' + t.d) + '" d="' + t.d + '"/>';
+      if (t.label) h += '<text class="map-territory-label' + fl('t:' + t.d) + '" x="' + t.lx + '" y="' + t.ly + '">' + t.label + '</text>';
+    });
+    MAP_RIVERS.forEach(function (r) {
+      h += '<path class="map-river" d="' + r.d + '"/>';
+      h += '<text class="river-label" x="' + r.lx + '" y="' + r.ly + '">' + r.name + '</text>';
+    });
+    state.routes.forEach(function (r) {
+      h += '<path class="map-route' + fl('r:' + r.key) + '" d="' + r.d + '"/>';
+      h += '<text class="route-label' + fl('r:' + r.key) + '" x="' + r.lx + '" y="' + r.ly + '">' + r.label + '</text>';
+    });
+    /* 发生地之间的连线：慢慢画出来，标出地点之间的变化。 */
+    if (state.wherePath) {
+      h += '<path class="where-path" pathLength="100" d="' + state.wherePath + '"/>';
+    }
+    marks.forEach(function (p, i) {
+      var xy = PLACE_XY[p.name];
+      if (!xy) return;
+      var left = !!LABEL_LEFT[p.name];
+      var lx = left ? xy[0] - 18 : xy[0] + 18;
+      var key = (p.cap ? 'c:' : (p.star ? 's:' : 'm:')) + p.name;
+      var cls = 'mk' + (p.cap ? ' cap' : '') + (p.star ? ' star' : '') + (p.where ? ' where-mk' : '') + fl(key);
+      var rad = (p.cap || p.where) ? 13 : 11;
+      var sty = p.where ? ' style="animation-delay: ' + (0.5 + 0.5 * i).toFixed(1) + 's"' : '';
+      var keyRing = (p.where && state.keyEvent)
+        ? '<circle class="key-ring" cx="' + xy[0] + '" cy="' + xy[1] + '" r="20"/>' +
+          '<text class="key-star" x="' + (xy[0] + 13) + '" y="' + (xy[1] - 13) + '">★</text>' : '';
+      var coreTxt = (p.where && p.core)
+        ? '<text class="core-label" x="' + lx + '" y="' + (xy[1] + 27) + '"' + (left ? ' text-anchor="end"' : '') + '>' + esc(p.core) + '</text>' : '';
+      h += '<g class="' + cls + '"' + sty + ' data-i="' + i + '">' + keyRing +
+        '<circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="' + rad + '"/>' +
+        '<text class="mk-num" x="' + xy[0] + '" y="' + (xy[1] + 4.5) + '">' + (i + 1) + '</text>' +
+        '<text class="mk-label" x="' + lx + '" y="' + (xy[1] + 5) + '"' + (left ? ' text-anchor="end"' : '') + '>' + esc(p.name) + '</text>' + coreTxt + '</g>';
+    });
+    return h + '</svg>';
+  }
