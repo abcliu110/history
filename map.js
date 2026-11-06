@@ -16,27 +16,35 @@ function escAttr(s) {
 
 /* 在 svg 元素里画出某时期的地图状态。
  * mapState: { territory:[d...], territoryNote, capital:[{x,y,name}], routes:[{id,name,d,lx,ly}], points:[{x,y,label,text}], astro:[{x,y,label,text}] }
- * onMarker(kind, item): 点标记时的回调。 */
-window.renderChinaMap = function (svg, mapState, onMarker) {
+ * onMarker(kind, item): 点标记时的回调。
+ * highlight（可选）: { territory:bool, routes:[id...], capitals:[name...], points:[label...], astro:[label...] }——
+ * 这一站新出现的东西，画出来时带一次闪烁，让孩子一眼看到地图变了哪里。 */
+window.renderChinaMap = function (svg, mapState, onMarker, highlight) {
   var M = window.CHINA_MAP;
+  var hi = highlight || {};
+  function has(list, v) { return (list || []).indexOf(v) !== -1; }
   var h = '';
   h += '<path class="map-land" d="' + M.outline + '"/>';
   h += '<ellipse class="map-land" cx="' + M.hainan.cx + '" cy="' + M.hainan.cy + '" rx="' + M.hainan.rx + '" ry="' + M.hainan.ry + '"/>';
   (mapState.territory || []).forEach(function (d) {
-    h += '<path class="map-territory" d="' + d + '"/>';
+    h += '<path class="map-territory' + (hi.territory ? ' flash' : '') + '" d="' + d + '"/>';
   });
   M.rivers.forEach(function (r) {
     h += '<path class="map-river" d="' + r.d + '"/>';
   });
   (mapState.routes || []).forEach(function (rt) {
-    h += '<path class="map-route" d="' + rt.d + '"/>';
-    h += '<text class="route-label" x="' + rt.lx + '" y="' + rt.ly + '">' + escAttr(rt.name) + '</text>';
+    var f = has(hi.routes, rt.id) ? ' flash' : '';
+    h += '<path class="map-route' + f + '" d="' + rt.d + '"/>';
+    h += '<text class="route-label' + f + '" x="' + rt.lx + '" y="' + rt.ly + '">' + escAttr(rt.name) + '</text>';
   });
   function marker(cls, it, sym) {
-    return '<g class="mk ' + cls + '" data-kind="' + cls + '" data-label="' + escAttr(it.label || it.name) + '">' +
+    var key = it.label || it.name;
+    var list = cls === 'capital' ? hi.capitals : cls === 'astro' ? hi.astro : hi.points;
+    var f = has(list, key) ? ' flash' : '';
+    return '<g class="mk ' + cls + f + '" data-kind="' + cls + '" data-label="' + escAttr(key) + '">' +
       '<circle cx="' + it.x + '" cy="' + it.y + '" r="9"/>' +
       '<text class="mk-sym" x="' + it.x + '" y="' + (it.y + 4.5) + '">' + sym + '</text>' +
-      '<text class="mk-label" x="' + (it.x + 12) + '" y="' + (it.y + 4) + '">' + escAttr(it.label || it.name) + '</text></g>';
+      '<text class="mk-label" x="' + (it.x + 12) + '" y="' + (it.y + 4) + '">' + escAttr(key) + '</text></g>';
   }
   (mapState.capital || []).forEach(function (c) { h += marker('capital', c, '都'); });
   (mapState.points || []).forEach(function (p) { h += marker('point', p, '●'); });

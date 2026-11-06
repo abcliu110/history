@@ -10,7 +10,7 @@
 <header class="topbar">
   <div class="topbar-inner">
     <h1>时间里的中国</h1>
-    <p class="subtitle">一副不断变化的中国地图，时间线在旁边——点一个朝代，地图就变到那个年代</p>
+    <p class="subtitle">一副不断变化的中国地图，时间线在旁边——点一个朝代、一个事件，地图就变到那个时刻</p>
   </div>
 </header>
 <main class="wrap">
@@ -18,18 +18,20 @@
     <aside class="rail" id="rail">
       <div class="rail-title">时间线</div>
       <ol id="railList"></ol>
-      <div class="rail-note">小提示：春秋战国是东周的一部分，近现代从1840年开始、与清朝末年重叠——朝代是按大事分的，不是按年份切开的。</div>
+      <div class="rail-note">小提示：东周就是春秋和战国两段，所以东周不单独列；三国和西晋、元朝和南宋、近现代和清朝末年都有几年重叠——朝代是按大事分的，不是按年份切开的。</div>
     </aside>
     <section class="stage">
+      <div class="ev-strip" id="evStrip" hidden></div>
       <div class="mapcard">
         <svg id="mapSvg" viewBox="0 0 1000 720" role="img" aria-label="中国示意地图"></svg>
+        <div class="mapchanged" id="mapChanged" hidden></div>
         <div class="mapnote" id="mapNote"></div>
         <div class="markerpop" id="markerPop">点一点地图上的标记，看看那个地方的故事。</div>
       </div>
       <div class="mapbar">
-        <button class="mapbtn" id="btnPrev" type="button">← 上一时期</button>
+        <button class="mapbtn" id="btnPrev" type="button">← 上一个</button>
         <button class="mapbtn primary" id="btnPlay" type="button">▶ 播放时间</button>
-        <button class="mapbtn" id="btnNext" type="button">下一时期 →</button>
+        <button class="mapbtn" id="btnNext" type="button">下一个 →</button>
       </div>
       <div class="story" id="story"></div>
       <section class="quiz" id="quizBox"></section>
@@ -41,6 +43,7 @@
 </footer>
 <script src="data.js"></script>
 <script src="mapdata.js"></script>
+<script src="dynasties.js"></script>
 <script src="map.js"></script>
 <script src="app.js"></script>
 </body>

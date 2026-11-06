@@ -35,6 +35,21 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: "PingFa
 .rail button .y { display: block; color: var(--gold); font-size: 12px; font-weight: 700; }
 .rail button .n { font-weight: 700; color: var(--accent-deep); }
 .rail-note { margin-top: 10px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+/* v3：时间线两级——时期分组 + 朝代下的重大事件 */
+.rail li.rail-group { font-size: 13px; font-weight: 700; color: var(--ink-soft); padding: 8px 10px 0; margin-bottom: 2px; }
+.rail li.rail-group::before { display: none; }
+.ev-list { list-style: none; margin: 2px 0 6px 14px; padding: 0 0 0 10px; border-left: 3px solid var(--accent-soft); }
+.ev-list li { margin-bottom: 4px; }
+.ev-list li::before { display: none; }
+.ev-list button { font-size: 14px; padding: 5px 8px; }
+.ev-list button.active { background: var(--accent-soft); border-color: var(--accent-deep); }
+/* v3：手机上事件放地图上方横排（桌面端藏起来，事件在时间线里） */
+.ev-strip { display: none; }
+/* v3：地图变了横幅 + 新出现东西的闪烁 */
+.mapchanged { margin-top: 8px; background: #fdf3e3; border: 2px solid var(--gold); border-radius: 10px; padding: 10px 14px; font-size: 16px; font-weight: 700; color: var(--gold); }
+.flash { animation: pulse 1s ease 2; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+.lens.event .mapline { margin-top: 10px; color: var(--accent-deep); font-weight: 700; }
 /* 地图 */
 .mapcard { background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 10px; }
 .mapcard svg { width: 100%; height: auto; display: block; }
@@ -93,10 +108,17 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: "PingFa
   .rail li { margin-bottom: 0; flex: 0 0 auto; }
   .rail li::before { display: none; }
   .rail button { white-space: nowrap; }
+  .rail li.rail-group { display: none; }
+  .ev-list { display: none; }
+  .ev-strip { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 10px; align-items: center; }
+  .ev-strip-label { flex: 0 0 auto; font-weight: 700; color: var(--ink-soft); font-size: 14px; white-space: nowrap; }
+  .ev-strip button { flex: 0 0 auto; padding: 8px 12px; border-radius: 10px; border: 2px solid var(--accent); background: var(--card); font-size: 15px; font-weight: 700; color: var(--accent-deep); cursor: pointer; white-space: nowrap; }
+  .ev-strip button.active { background: var(--accent-soft); border-color: var(--accent-deep); }
   .city-label { display: none; }
 }
 @media (prefers-color-scheme: dark) {
   :root { --bg: #232a22; --card: #2e362c; --surface: #333d31; --ink: #e6ebe2; --ink-soft: #b9c4b4; --accent: #7fb08d; --accent-deep: #a8cfae; --accent-soft: #3d5240; --line: #4a5546; --gold: #d9a05b; --land: #33402f; }
   .mapbtn.primary { color: #1e261d; }
   .quiz .opt.wrong { background: #4a2a33; }
+  .mapchanged { background: #3a2f22; }
 }
