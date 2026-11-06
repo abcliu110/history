@@ -38,7 +38,7 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: "PingFa
 /* v3：时间线两级——时期分组 + 朝代下的重大事件 */
 .rail li.rail-group { font-size: 13px; font-weight: 700; color: var(--ink-soft); padding: 8px 10px 0; margin-bottom: 2px; }
 .rail li.rail-group::before { display: none; }
-.ev-list { list-style: none; margin: 2px 0 6px 14px; padding: 0 0 0 10px; border-left: 3px solid var(--accent-soft); }
+.ev-list { list-style: none; margin: 2px 0 6px 14px; padding: 0 0 0 10px; border-left: 3px solid var(--accent-soft); max-height: 320px; overflow-y: auto; }
 .ev-list li { margin-bottom: 4px; }
 .ev-list li::before { display: none; }
 .ev-list button { font-size: 14px; padding: 5px 8px; }
@@ -50,6 +50,12 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: "PingFa
 .flash { animation: pulse 1s ease 2; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
 .lens.event .mapline { margin-top: 10px; color: var(--accent-deep); font-weight: 700; }
+/* v3.1：事件发生地——编号圆点按顺序蹦出来，地点之间的连线慢慢画出来 */
+.where-path { fill: none; stroke: var(--red); stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; animation: drawpath 1.2s ease forwards; }
+@keyframes drawpath { to { stroke-dashoffset: 0; } }
+.where-mk circle { fill: var(--red); stroke: var(--surface); stroke-width: 2; }
+.where-mk { animation: popin .45s ease both; }
+@keyframes popin { from { opacity: 0; } to { opacity: 1; } }
 /* 地图 */
 .mapcard { background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 10px; }
 .mapcard svg { width: 100%; height: auto; display: block; }

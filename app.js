@@ -1,12 +1,17 @@
-/* 时间里的中国 v3：事件驱动地图。
+/* 时间里的中国 v3.1：事件驱动地图 + 点事件自动连播。
  * 时间线按朝代分（21 个节点）；点朝代进朝代，点重大事件地图就变到那个时刻：
  * 每一站（朝代或事件）自带地图状态，新出现的东西闪一下，并有一句“地图变了”。
+ * 事件有发生地（EVENT_WHERE）：点事件，地图上按顺序标出发生地（编号圆点），
+ * 多个地点之间连一条线，标出地点之间的变化；显示完（6 秒）自动到下一个事件，
+ * 点标记、答题时会暂停，随时能点任意事件跳过去。
  * 秦、西汉、东汉、隋、唐 5 个朝代有完整事件内容；其余朝代先沿用 8 个时期的内容。 */
 (function () {
   'use strict';
   var DATA = window.TIME_CHINA;
   var MAPS = window.ERA_MAPS;
   var DYNS = window.DYNASTIES;
+  var WHERE = window.EVENT_WHERE || {};
+  var TOUR_MS = 6000;
   var ERA_BY_ID = {};
   DATA.eras.forEach(function (e) { ERA_BY_ID[e.id] = e; });
 
@@ -162,10 +167,10 @@
     });
     railList.innerHTML = html;
     railList.querySelectorAll('button[data-dyn]').forEach(function (b) {
-      b.addEventListener('click', function () { stopPlay(); setStop(firstStopOfDynasty(b.getAttribute('data-dyn'))); });
+      b.addEventListener('click', function () { setStop(firstStopOfDynasty(b.getAttribute('data-dyn'))); startTour(); });
     });
     railList.querySelectorAll('button[data-ev]').forEach(function (b) {
-      b.addEventListener('click', function () { stopPlay(); setStop(stopIndexOf(cur.dyn.id, b.getAttribute('data-ev'))); });
+      b.addEventListener('click', function () { setStop(stopIndexOf(cur.dyn.id, b.getAttribute('data-ev'))); startTour(); });
     });
     /* 手机上时间线是横排，事件另外放一条横排（桌面端这条藏起来）。 */
     if (evStrip) {
@@ -178,7 +183,7 @@
         evStrip.innerHTML = sh;
         evStrip.hidden = false;
         evStrip.querySelectorAll('button[data-ev]').forEach(function (b) {
-          b.addEventListener('click', function () { stopPlay(); setStop(stopIndexOf(cur.dyn.id, b.getAttribute('data-ev'))); });
+          b.addEventListener('click', function () { setStop(stopIndexOf(cur.dyn.id, b.getAttribute('data-ev'))); startTour(); });
         });
       } else {
         evStrip.innerHTML = '';
@@ -192,11 +197,12 @@
     var dyn = stop.dyn;
     var ev = stop.event;
     var era = ERA_BY_ID[dyn.era];
-    var ms = ev ? ev.map : (MAPS[dyn.era] || {});
+    var ms = ev ? Object.assign({}, ev.map, WHERE[ev.id] || {}) : (MAPS[dyn.era] || {});
     renderRail();
     var hi = diffMaps(prevMap, ms);
     window.renderChinaMap(mapSvg, ms, function (kind, item) {
-      var tag = kind === 'capital' ? '都城' : kind === 'astro' ? '观星' : '地方';
+      stopTour(); /* 点标记看地方故事时停下来，不自动跳走 */
+      var tag = kind === 'capital' ? '都城' : kind === 'astro' ? '观星' : kind === 'where' ? '发生地' : '地方';
       markerPop.innerHTML = '<b>' + esc(item.label || item.name) + '（' + tag + '）</b>：' + esc(item.text || '');
     }, hi);
     prevMap = ms;
@@ -237,34 +243,51 @@
     }
     btnPrev.disabled = stopIdx === 0;
     btnNext.disabled = stopIdx === STOPS.length - 1;
+    /* 当前朝代/事件滚到眼前：事件列表再长，当前这一站也找得到。 */
+    try {
+      var ab = railList.querySelector('button[data-dyn].active');
+      if (ab) ab.scrollIntoView({ block: 'nearest' });
+      var ae = railList.querySelector('.ev-list button.active');
+      if (ae) ae.scrollIntoView({ block: 'nearest' });
+      if (evStrip && !evStrip.hidden) {
+        var ac = evStrip.querySelector('button.active');
+        if (ac) ac.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+      }
+    } catch (e) { /* 滚动失败不影响地图与故事 */ }
     document.title = (ev ? dyn.name + ' · ' + ev.title : dyn.name) + ' · 时间里的中国';
     var hash = '#d=' + dyn.id + (ev ? '&e=' + ev.id : '');
     try { if (location.hash !== hash) history.replaceState(null, '', hash); } catch (e) { /* 地址栏同步失败不影响地图与故事 */ }
   }
-  function stopPlay() {
+  function stopTour() {
     if (timer) { clearInterval(timer); timer = null; }
     btnPlay.textContent = '▶ 播放时间';
   }
-  btnPrev.addEventListener('click', function () { stopPlay(); setStop(stopIdx - 1); });
-  btnNext.addEventListener('click', function () { stopPlay(); setStop(stopIdx + 1); });
-  btnPlay.addEventListener('click', function () {
-    if (timer) { stopPlay(); return; }
-    btnPlay.textContent = '❚❚ 暂停';
+  function startTour() {
+    if (timer) clearInterval(timer);
     timer = setInterval(function () {
-      if (stopIdx >= STOPS.length - 1) { stopPlay(); return; }
+      if (stopIdx >= STOPS.length - 1) { stopTour(); return; }
       setStop(stopIdx + 1);
-    }, 3500);
+    }, TOUR_MS);
+    btnPlay.textContent = '❚❚ 暂停';
+  }
+  btnPrev.addEventListener('click', function () { setStop(stopIdx - 1); if (timer) startTour(); });
+  btnNext.addEventListener('click', function () { setStop(stopIdx + 1); if (timer) startTour(); });
+  btnPlay.addEventListener('click', function () {
+    if (timer) { stopTour(); return; }
+    startTour();
   });
+  /* 答题时停下来，不自动跳走。 */
+  quizBox.addEventListener('click', function () { stopTour(); });
   window.addEventListener('hashchange', function () {
     var m = (location.hash || '').match(/^#d=([\w-]+)(?:&e=([\w-]+))?/);
     if (m) {
       var si = stopIndexOf(m[1], m[2] || null);
-      if (si >= 0) { stopPlay(); setStop(si); return; }
+      if (si >= 0) { setStop(si); return; }
     }
     var old = (location.hash || '').match(/^#era=([\w-]+)/);
     if (old) {
       for (var i = 0; i < DYNS.length; i++) {
-        if (DYNS[i].era === old[1]) { stopPlay(); setStop(firstStopOfDynasty(DYNS[i].id)); return; }
+        if (DYNS[i].era === old[1]) { setStop(firstStopOfDynasty(DYNS[i].id)); return; }
       }
     }
   });

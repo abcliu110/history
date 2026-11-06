@@ -15,14 +15,25 @@ function escAttr(s) {
 }
 
 /* 在 svg 元素里画出某时期的地图状态。
- * mapState: { territory:[d...], territoryNote, capital:[{x,y,name}], routes:[{id,name,d,lx,ly}], points:[{x,y,label,text}], astro:[{x,y,label,text}] }
+ * mapState: { territory:[d...], territoryNote, capital:[{x,y,name}], routes:[{id,name,d,lx,ly}], points:[{x,y,label,text}], astro:[{x,y,label,text}],
+ *   where:[{x,y,label,text}]（事件发生地，按顺序）, wherePath（发生地之间的连线） }
  * onMarker(kind, item): 点标记时的回调。
  * highlight（可选）: { territory:bool, routes:[id...], capitals:[name...], points:[label...], astro:[label...] }——
- * 这一站新出现的东西，画出来时带一次闪烁，让孩子一眼看到地图变了哪里。 */
+ * 这一站新出现的东西，画出来时带一次闪烁，让孩子一眼看到地图变了哪里。
+ * 发生地标记（where）不参与 highlight：它自己按顺序一个一个蹦出来，连线慢慢画出来。 */
 window.renderChinaMap = function (svg, mapState, onMarker, highlight) {
   var M = window.CHINA_MAP;
   var hi = highlight || {};
   function has(list, v) { return (list || []).indexOf(v) !== -1; }
+  var whereList = mapState.where || [];
+  /* 发生地附近 20px 内的普通标记不画了——编号标记已经代表那个地方，避免两个圈叠在一起。 */
+  function nearWhere(x, y) {
+    for (var i = 0; i < whereList.length; i++) {
+      var dx = whereList[i].x - x, dy = whereList[i].y - y;
+      if (dx * dx + dy * dy < 400) return true;
+    }
+    return false;
+  }
   var h = '';
   h += '<path class="map-land" d="' + M.outline + '"/>';
   h += '<ellipse class="map-land" cx="' + M.hainan.cx + '" cy="' + M.hainan.cy + '" rx="' + M.hainan.rx + '" ry="' + M.hainan.ry + '"/>';
@@ -37,7 +48,12 @@ window.renderChinaMap = function (svg, mapState, onMarker, highlight) {
     h += '<path class="map-route' + f + '" d="' + rt.d + '"/>';
     h += '<text class="route-label' + f + '" x="' + rt.lx + '" y="' + rt.ly + '">' + escAttr(rt.name) + '</text>';
   });
+  /* 发生地之间的连线：慢慢画出来，标出地点之间的变化。 */
+  if (mapState.wherePath) {
+    h += '<path class="where-path" pathLength="100" d="' + mapState.wherePath + '"/>';
+  }
   function marker(cls, it, sym) {
+    if (nearWhere(it.x, it.y)) return '';
     var key = it.label || it.name;
     var list = cls === 'capital' ? hi.capitals : cls === 'astro' ? hi.astro : hi.points;
     var f = has(list, key) ? ' flash' : '';
@@ -49,12 +65,19 @@ window.renderChinaMap = function (svg, mapState, onMarker, highlight) {
   (mapState.capital || []).forEach(function (c) { h += marker('capital', c, '都'); });
   (mapState.points || []).forEach(function (p) { h += marker('point', p, '●'); });
   (mapState.astro || []).forEach(function (a) { h += marker('astro', a, '★'); });
+  /* 发生地：编号圆点，按顺序一个一个蹦出来。 */
+  whereList.forEach(function (wpt, i) {
+    h += '<g class="mk where-mk" data-kind="where" data-label="' + escAttr(wpt.label) + '" style="animation-delay: ' + (0.5 + 0.5 * i).toFixed(1) + 's">' +
+      '<circle cx="' + wpt.x + '" cy="' + wpt.y + '" r="11"/>' +
+      '<text class="mk-sym" x="' + wpt.x + '" y="' + (wpt.y + 4.5) + '">' + (i + 1) + '</text>' +
+      '<text class="mk-label" x="' + (wpt.x + 14) + '" y="' + (wpt.y + 4) + '">' + escAttr(wpt.label) + '</text></g>';
+  });
   svg.innerHTML = h;
   svg.querySelectorAll('.mk').forEach(function (g) {
     g.addEventListener('click', function () {
       var kind = g.getAttribute('data-kind');
       var label = g.getAttribute('data-label');
-      var list = kind === 'capital' ? mapState.capital : kind === 'astro' ? mapState.astro : mapState.points;
+      var list = kind === 'capital' ? mapState.capital : kind === 'astro' ? mapState.astro : kind === 'where' ? mapState.where : mapState.points;
       var item = null;
       (list || []).forEach(function (it) { if ((it.label || it.name) === label) item = it; });
       if (item && onMarker) onMarker(kind, item);
