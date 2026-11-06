@@ -1,0 +1,68 @@
+/* 时间里的中国：护眼配色，与识字星球字卡页同款底色 */
+:root {
+  --bg: #e4eedf;
+  --card: #f2f6ee;
+  --surface: #f8faf5;
+  --ink: #2c3328;
+  --ink-soft: #5a6656;
+  --accent: #4a7a59;
+  --accent-deep: #3d5a40;
+  --accent-soft: #d3e5d6;
+  --line: #d5dfd0;
+  --gold: #a8642f;
+  --red: #8f1d3f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.8; }
+.topbar { background: var(--card); border-bottom: 2px solid var(--line); position: sticky; top: 0; z-index: 10; }
+.topbar-inner { max-width: 860px; margin: 0 auto; padding: 16px 20px; }
+.topbar h1 { margin: 0; font-size: 26px; color: var(--accent-deep); }
+.subtitle { margin: 4px 0 0; color: var(--ink-soft); font-size: 15px; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 20px; }
+.foot { max-width: 860px; margin: 0 auto; padding: 0 20px 32px; color: var(--ink-soft); font-size: 14px; }
+.lead { background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 20px; font-size: 17px; }
+.lead b { color: var(--accent-deep); }
+/* 时间线 */
+.timeline { list-style: none; margin: 0; padding: 0 0 0 18px; border-left: 4px solid var(--accent-soft); }
+.timeline li { position: relative; margin: 0 0 16px; }
+.timeline li::before { content: ""; position: absolute; left: -29px; top: 22px; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); }
+.era-card { display: block; background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 16px 18px; text-decoration: none; color: var(--ink); }
+.era-card:hover { border-color: var(--accent); }
+.era-card .years { color: var(--gold); font-weight: 700; font-size: 15px; }
+.era-card h2 { margin: 2px 0 4px; font-size: 22px; color: var(--accent-deep); }
+.era-card p { margin: 0; color: var(--ink-soft); }
+.era-card .lenses { margin-top: 8px; font-size: 14px; color: var(--accent-deep); }
+/* 详情页 */
+.backrow { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.backbtn { display: inline-block; padding: 10px 18px; border-radius: 12px; background: var(--accent); color: #fff; font-size: 17px; font-weight: 700; text-decoration: none; border: 2px solid var(--accent-deep); cursor: pointer; }
+.backbtn.ghost { background: var(--accent-soft); color: var(--accent-deep); }
+.detail h2 { margin: 0 0 4px; font-size: 26px; color: var(--accent-deep); }
+.detail .years { color: var(--gold); font-weight: 700; font-size: 17px; }
+.detail .tagline { font-size: 18px; background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 12px 16px; margin: 12px 0 20px; }
+.lens { background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; }
+.lens h3 { margin: 0 0 8px; font-size: 19px; color: var(--accent-deep); }
+.lens ul { margin: 0; padding-left: 22px; }
+.lens li { margin-bottom: 8px; }
+.lens li b { color: var(--accent-deep); }
+.poem { background: var(--surface); border-left: 4px solid var(--accent); border-radius: 8px; padding: 10px 14px; margin: 10px 0; }
+.poem .quote { font-size: 18px; font-weight: 700; }
+.poem .from { color: var(--ink-soft); font-size: 14px; }
+.poem .say { margin-top: 4px; }
+/* 动手练 */
+.quiz { background: var(--card); border: 2px solid var(--accent); border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; }
+.quiz h3 { margin: 0 0 8px; font-size: 19px; color: var(--accent-deep); }
+.quiz .q { font-size: 18px; font-weight: 700; margin: 8px 0; }
+.quiz .opts { display: grid; gap: 10px; margin: 12px 0; }
+.quiz .opt { text-align: left; padding: 12px 14px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); font-size: 17px; cursor: pointer; color: var(--ink); }
+.quiz .opt:hover { border-color: var(--accent); }
+.quiz .opt.correct { border-color: var(--accent-deep); background: var(--accent-soft); }
+.quiz .opt.wrong { border-color: var(--red); background: #f7e8ec; }
+.quiz .opt:disabled { cursor: default; opacity: 0.85; }
+.quiz .why { background: var(--surface); border-radius: 10px; padding: 10px 14px; margin: 8px 0; }
+.quiz .nextbtn { padding: 10px 18px; border-radius: 12px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; border: 2px solid var(--accent-deep); cursor: pointer; }
+.quiz .score { font-size: 18px; font-weight: 700; color: var(--accent-deep); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #232a22; --card: #2e362c; --surface: #333d31; --ink: #e6ebe2; --ink-soft: #b9c4b4; --accent: #7fb08d; --accent-deep: #a8cfae; --accent-soft: #3d5240; --line: #4a5546; --gold: #d9a05b; }
+  .backbtn { color: #1e261d; }
+  .quiz .opt.wrong { background: #4a2a33; }
+}
