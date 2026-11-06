@@ -112,6 +112,13 @@
     markerPop.textContent = '点一点地图上的标记，看看那个地方的故事。';
     var html = '<div class="years">' + esc(era.years) + '</div><h2>' + esc(era.name) + '</h2>';
     html += '<div class="tagline">' + esc(era.tagline) + '</div>';
+    if (era.prologue) {
+      html += '<section class="lens prologue"><h3>先说远古</h3><ul>';
+      era.prologue.forEach(function (it) {
+        html += '<li><b>' + esc(it.t) + '</b>：' + esc(it.d) + '</li>';
+      });
+      html += '</ul></section>';
+    }
     LENSES.forEach(function (pair) { html += lensHtml(era, pair[0], pair[1]); });
     story.innerHTML = html;
     startQuiz(era);

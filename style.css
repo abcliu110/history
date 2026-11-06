@@ -34,6 +34,7 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: "PingFa
 .rail button.active { background: var(--accent-soft); border-color: var(--accent-deep); }
 .rail button .y { display: block; color: var(--gold); font-size: 12px; font-weight: 700; }
 .rail button .n { font-weight: 700; color: var(--accent-deep); }
+.rail-note { margin-top: 10px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
 /* 地图 */
 .mapcard { background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 10px; }
 .mapcard svg { width: 100%; height: auto; display: block; }
